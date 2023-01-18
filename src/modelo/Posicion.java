@@ -1,5 +1,7 @@
 package modelo;
 
+import java.text.DecimalFormat;
+
 public class Posicion {
     private double x , y = 0;
 
@@ -42,9 +44,20 @@ public class Posicion {
                 if(Double.isNaN(distanciaFinal)){
                 throw new IllegalArgumentException("La distancia resultante no es un número.");
                 }
-                
+
                 return distanciaFinal;
         }
 
     }
+    
+    DecimalFormat df = new DecimalFormat("###.###");
+    String XTresDecimales = df.format(x);
+    String YTresDecimales = df.format(y);
+
+    @Override
+    public String toString() {
+        return "Posicion (x=" + XTresDecimales + ", y=" + YTresDecimales + ")";
+    }
+
+    
 }
