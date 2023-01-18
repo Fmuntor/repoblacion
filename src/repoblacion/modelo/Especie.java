@@ -1,4 +1,4 @@
-package modelo;
+package repoblacion.modelo;
 
 public enum Especie {
     ALAMO("álamo"),

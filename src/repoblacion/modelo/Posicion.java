@@ -1,6 +1,8 @@
-package modelo;
+package repoblacion.modelo;
 
 import java.text.DecimalFormat;
+
+
 
 public class Posicion {
     private double x , y = 0;
@@ -26,13 +28,17 @@ public class Posicion {
         this.y = y;
     }
 
-    public Posicion(Posicion p){
-        this(p.getX(), p.getY());
+    public Posicion(Posicion posicion){
+        if (posicion == null) {
+            throw new NullPointerException("ERROR: No se puede copiar una posición nula.");
+        }
+        this.x = posicion.getX();
+        this.y = posicion.getY();
     }
-
+    Posicion posicion=null;
     public double distancia(Posicion posicion){
         if(posicion == null){
-            throw new NullPointerException("No se ha podido relaizar la operacion.");
+            throw new NullPointerException("ERROR: No se puede calcular la distancia a una posición nula.");
         }else{
                 double diferenciaX = this.x - posicion.getX();
                 double diferenciaY = this.y - posicion.getY();
@@ -50,14 +56,9 @@ public class Posicion {
 
     }
     
-    DecimalFormat df = new DecimalFormat("###.###");
-    String XTresDecimales = df.format(x);
-    String YTresDecimales = df.format(y);
-
     @Override
-    public String toString() {
-        return "Posicion (x=" + XTresDecimales + ", y=" + YTresDecimales + ")";
-    }
-
-    
+public String toString() {
+    DecimalFormat df = new DecimalFormat("#,###.000");
+    return "x=" + df.format(x) + ", y=" + df.format(y) + "";
+}
 }
