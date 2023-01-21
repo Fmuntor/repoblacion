@@ -48,7 +48,7 @@ public class Posicion {
                 }
 
                 if(Double.isNaN(distanciaFinal)){
-                throw new IllegalArgumentException("La distancia resultante no es un número.");
+                    throw new IllegalArgumentException("La distancia resultante no es un número.");
                 }
 
                 return distanciaFinal;
