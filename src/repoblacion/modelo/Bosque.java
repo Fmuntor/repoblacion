@@ -3,6 +3,8 @@ package repoblacion.modelo;
 import java.util.Arrays;
 import java.util.Random;
 
+import repoblacion.utilidides.Consola;
+
 public class Bosque {
 
     private final int MAX_ALTURA = 1000;
@@ -46,6 +48,7 @@ public class Bosque {
     }
 
     public void setAlto(int alto) {
+        Consola.leerAltura();
         if(alto <= MINIMO || alto > MAX_ALTURA){
             throw new IllegalArgumentException("ERROR: Altura no válida.");
         }
