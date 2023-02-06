@@ -2,8 +2,6 @@ package repoblacion.modelo;
 
 import java.text.DecimalFormat;
 
-
-
 public class Posicion {
     private double x , y = 0;
 
@@ -57,8 +55,8 @@ public class Posicion {
     }
     
     @Override
-public String toString() {
-    DecimalFormat df = new DecimalFormat("#,###.000");
-    return "x=" + df.format(x) + ", y=" + df.format(y) + "";
-}
+    public String toString() {
+        DecimalFormat df = new DecimalFormat("#,##0.000");
+        return "x=" + df.format(x) + ", y=" + df.format(y) + "";
+    }
 }

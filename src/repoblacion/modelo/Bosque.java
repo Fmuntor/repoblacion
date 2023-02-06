@@ -3,13 +3,11 @@ package repoblacion.modelo;
 import java.util.Arrays;
 import java.util.Random;
 
-import repoblacion.utilidides.Consola;
-
 public class Bosque {
 
-    private final int MAX_ALTURA = 1000;
+    public static final int MAX_ALTURA = 500;
     private final int MAX_ANCHURA = 1000;
-    private final int MINIMO = 5;
+    private final int MINIMO = 10;
     private final int MAX_ESPECIES = 4;
 
     Arbol arbolMasAlejado;
@@ -22,7 +20,6 @@ public class Bosque {
     int arbolesActuales = 0;
     int especiesActuales = 0;
     Especie especieElegida = null;
-    private final int MAX_POBLACION = (alto*2)+(ancho*2);
 
     public Arbol getArbolMasAlejado() {
         return arbolMasAlejado;
@@ -48,7 +45,6 @@ public class Bosque {
     }
 
     public void setAlto(int alto) {
-        Consola.leerAltura();
         if(alto <= MINIMO || alto > MAX_ALTURA){
             throw new IllegalArgumentException("ERROR: Altura no válida.");
         }
@@ -68,12 +64,15 @@ public class Bosque {
         setAncho(ancho);
         setAlto(alto);
         setPoblacion(poblacion);
+        this.arboles = new Arbol[poblacion];
         repoblar();
+        realizarCalculos();
     }
+
     // Realizamos una copia profunda para evitar el aliasing
-    private Arbol[] duplicaBosque(){
+    public Arbol[] duplicaBosque(){
         Arbol[] bosqueDuplicado = new Arbol[arboles.length];
-        for (int i = 0; i < arboles.length; i++) {
+        for (int i = 0; i < bosqueDuplicado.length; i++) {
             bosqueDuplicado[i] = new Arbol(arboles[i]);
         }
         return bosqueDuplicado;
@@ -83,34 +82,36 @@ public class Bosque {
         if(poblacion<=0){
             throw new IllegalArgumentException("ERROR: La población debe ser mayor que cero.");
         }
-        if(poblacion >= MAX_POBLACION){
-            throw new IllegalArgumentException("ERROR: Altura no válida.");
+        if(poblacion > (2*(this.ancho+this.alto))){
+            throw new IllegalArgumentException("ERROR: La población no puede superar el perímetro del bosque."); 
         }
     }
+    
 
     private void repoblar(){
+        generador=new Random();
         if(arboles[0] == null){
             // Obtener el tamaño del enumerado Especie.
-        Especie[] especies = Especie.values();
-        int tamañoEspecie = especies.length;
+            Especie[] especies = Especie.values();
+            int tamañoEspecie = especies.length;
 
-        // Obtener indice aleatorio en el rango anterior
-        int indice = generador.nextInt(tamañoEspecie);
+            // Obtener indice aleatorio en el rango anterior
+            int indice = generador.nextInt(tamañoEspecie);
 
-        // Asignar al indice el elemento del enumerado
-        Especie especieAleatoria = especies[indice];
+            // Asignar al indice el elemento del enumerado
+            Especie especieAleatoria = especies[indice];
 
-        // Una vez se ha generado la primera especie, generamos su posicion aleatoria dentro del rango introducido.
-        int Xrandom = generador.nextInt(-ancho/2, ancho/2);
-        int Yrandom = generador.nextInt(-alto/2, alto/2);
+            // Una vez se ha generado la primera especie, generamos su posicion aleatoria dentro del rango introducido.
+            int Xrandom = generador.nextInt(-ancho/2, ancho/2);
+            int Yrandom = generador.nextInt(-alto/2, alto/2);
 
-        Posicion posicionAleatoria = new Posicion(Xrandom, Yrandom);
+            Posicion posicionAleatoria = new Posicion(Xrandom, Yrandom);
 
-        // Crear el primer arbol con los parametros anteriores e introducirlo en la primera posicion del array arboles
-        Arbol arbol1 = new Arbol(especieAleatoria, posicionAleatoria);
-        arboles[0] = arbol1;
-        arbolesActuales++;
-        especiesActuales++;
+            // Crear el primer arbol con los parametros anteriores e introducirlo en la primera posicion del array arboles
+            arboles[0] = new Arbol(especieAleatoria, posicionAleatoria);
+            arbolesActuales++;
+            especiesActuales++;
+            System.out.println("Arbol "+arbolesActuales+":"+arboles[0]);
         }
         
         // Una vez creado el primer arbol, creamos el resto segun las restricciones.
@@ -121,11 +122,14 @@ public class Bosque {
             while(especieRandom == null){
                 especieRandom = generarEspecieAleatoria(arboles[i-1].getEspecie());
             }
-            while(especieRandom == null){
+            while(posicionRandom == null){
                 posicionRandom = generarPosicionAleatoria(arboles[i-1].getPosicion());
             }
             arboles[i] = new Arbol(especieRandom, posicionRandom);
             arbolesActuales++;
+            System.out.println("Arbol "+(arbolesActuales)+":"+arboles[i]);
+            especieRandom=null;
+            posicionRandom=null;
         }
     }
 
@@ -257,51 +261,103 @@ public class Bosque {
                     break;
         }
             // Si las especies actuales son menores que 4, se consulta si hay especies diferentes para aumentar o no la variable
-            if(especiesActuales<MAX_ESPECIES){
-                for(int i=0; i<arboles.length; i++){
-                    // Si la especie generada no se ha introducido en el bosque, aumentamos la variable que indica las especies diferentes del bosque
-                    if(arboles[i].getEspecie() != especieElegida){
+            boolean existe=false;
+                for(int i=0;i<arbolesActuales;i++){
+                    // Si algun arbol del array tiene la misma especie, se añade al array
+                    if(arboles[i].getEspecie() == especieElegida){
+                        existe=true;
+                    }
+                }
+                if(existe){
+                    return especieElegida;
+                }else{
+                    // Si la especie existe y hay menos de 4 especies, se añade la especie generada y aumenta la cantidad de especies actuales.
+                    if(especiesActuales<MAX_ESPECIES){
                         especiesActuales++;
-                        break;
-                    }
-                }
-            // Si ya hay 4 especies diferentes, comprueba que la especie elegida no es diferente a las ya existentes
-            }else{
-                for(int i=0; i<arboles.length; i++){
-                    // Si la especie generada es diferente que alguna especie existente en el bosque, devolvemos una especie nula.
-                    if(arboles[i].getEspecie() != especieElegida){
-                       return null;
-                    }
-                }
-            }return especieElegida;     
+                        return especieElegida;
+                }else{
+                    return null;
+            }
+            // Si intenta meter una especie nueva y no podra meterla nunca, se actualizan las especies posibles pa nop generar la misma varias veces
+        }
     }
 
     private Posicion generarPosicionAleatoria(Posicion posicion){
-        Posicion posicionAleatoria = new Posicion(generador.nextDouble(-posicion.getX()/2, posicion.getX()/2), generador.nextDouble(-posicion.getY(), posicion.getY()));
-        for(int i=0; i<arboles.length; i++){
+        Posicion posicionAleatoria = null;
+        try{
+            posicionAleatoria = new Posicion(generador.nextDouble(-ancho/2, ancho/2), generador.nextDouble(-alto, alto));
+        }catch(IllegalArgumentException e){
+            posicionAleatoria = null;
+        }
+            for(int i=0; i<arbolesActuales; i++){
             if(arboles[i].getPosicion() == posicionAleatoria){
                 return null;
-            }else{}
+            }
         }return posicionAleatoria;
     }
 
     public void realizarCalculos(){
-        arbolMasCentrado = new Arbol();
-        arbolMasAlejado = new Arbol();
-        //Comparamos la distancia entre cada arbol y el centro
-        for(int i=0;i<arboles.length;i++){
-            if(arboles[i].getPosicion().distancia(arboles[i].getPosicion()) < arboles[i+1].getPosicion().distancia(arboles[i+1].getPosicion())){
+        Posicion centro=new Posicion(0,0);
+        double distanciaMaxima = Double.MAX_VALUE;
+        double distanciaMinima = Double.MIN_VALUE;
+        arbolMasCentrado = null;
+        arbolMasAlejado = null;
+        int lejos=0, cerca=0;
+        //Comparamos la distancia entre cada arbol y el centro.
+        /*
+        for(int i=0;i<arboles.length-1;i++){
+            double distanciaActual = arboles[i].getPosicion().distancia(centro);
+            if(distanciaActual <= distanciaMaxima){
+                distanciaMaxima = distanciaActual;
                 arbolMasCentrado = arboles[i];
+                cerca=i;
             }
-            if(arboles[i].getPosicion().distancia(arboles[i].getPosicion()) > arboles[i+1].getPosicion().distancia(arboles[i+1].getPosicion())){
+        }
+        for(int i=0;i<arboles.length-1;i++){
+            double distanciaActual = arboles[i].getPosicion().distancia(centro);
+            if(distanciaActual > distanciaMinima){
+                distanciaMinima = distanciaActual;
                 arbolMasAlejado = arboles[i];
+                lejos=i;
             }
+        }
+        */
+
+        distanciaMaxima = Double.MIN_VALUE;
+        distanciaMinima = Double.MAX_VALUE;
+        for(int i=0;i<arboles.length;i++){
+            double distanciaActual = arboles[i].getPosicion().distancia(centro);
+
+            if(distanciaActual > distanciaMaxima){
+                distanciaMaxima = distanciaActual;
+                arbolMasAlejado = arboles[i];
+                lejos=i;
+            }
+
+            if(distanciaActual < distanciaMinima){
+                distanciaMinima = distanciaActual;
+                arbolMasCentrado = arboles[i];
+                cerca=i;
+            }
+        }
+
+    
+            //if(arboles[i].getPosicion().distancia(arboles[i].getPosicion()) > arboles[i+1].getPosicion().distancia(arboles[i+1].getPosicion())){
+           //     arbolMasAlejado = new Arbol(arboles[i].getEspecie(),arboles[i].getPosicion());
+            
+        System.out.println("El arbol mas centrado es: Arbol "+(cerca+1)+": "+arbolMasCentrado);System.out.println("El arbol mas alejado es: Arbol "+(lejos+1)+": "+arbolMasAlejado);
+    }
+
+    public void mostrar(){
+        for (int i = 0; i < arboles.length; i++) {
+            System.out.println(arboles[i]);
         }
     }
 
     @Override
     public String toString() {
-        return "Arboles = " + Arrays.toString(arboles) + ", ancho = " + ancho + ", alto = " + alto + "Arbol mas alejado del centro = "+arbolMasAlejado+
-        "Arbol mas centrado = "+arbolMasCentrado;
+        return "Bosque [arbolMasAlejado=" + arbolMasAlejado + ", arbolMasCentrado=" + arbolMasCentrado + ", arboles="
+                + Arrays.toString(arboles) + ", poblacion=" + poblacion + "]";
     }
 }
+    /*TODO: Error altura/anchura no valida al intentar meter demasiada poblacion. TEST. Si se crea una poblacion de 1 o 2 no calcula el mas alejado ni centrado. */
