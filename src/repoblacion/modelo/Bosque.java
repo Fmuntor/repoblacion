@@ -360,4 +360,3 @@ public class Bosque {
                 + Arrays.toString(arboles) + ", poblacion=" + poblacion + "]";
     }
 }
-    /*TODO: Error altura/anchura no valida al intentar meter demasiada poblacion. TEST. Si se crea una poblacion de 1 o 2 no calcula el mas alejado ni centrado. */

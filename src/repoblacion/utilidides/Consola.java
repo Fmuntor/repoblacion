@@ -2,7 +2,6 @@ package repoblacion.utilidides;
 
 import org.iesalandalus.programacion.utilidades.Entrada;
 
-import repoblacion.modelo.Bosque;
 
 public class Consola {
     public static int alto=0;
